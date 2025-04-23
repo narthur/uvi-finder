@@ -24,6 +24,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+
   release:
     needs: find-uvis
     runs-on: ubuntu-latest
@@ -43,13 +44,14 @@ jobs:
           PACKAGE_NAME=$(node -p "require('./package.json').name")
           
           # Format UVIs for release notes
-          NOTES="## User-Visible Improvements\n\n"
+          NOTES=""
+          NOTES+=$'## User-Visible Improvements\n\n'
           if [ "$UVI_LIST" != "[]" ] && [ -n "$UVI_LIST" ]; then
-            echo "$UVI_LIST" | jq -r '.[] | "* " + .description + if .impact then " (" + .impact + ")" else "" end' | while read -r line; do
-              NOTES="$NOTES$line\n"
-            done
+            while IFS= read -r line; do
+              NOTES+="$line"$'\n'
+            done < <(echo "$UVI_LIST" | jq -r '.[] | "* " + .description + if .impact then " (" + .impact + ")" else "" end')
           else
-            NOTES="$NOTES*No user-visible improvements in this release.*\n"
+            NOTES+=$'*No user-visible improvements in this release.*\n'
           fi
           
           # Create main version release with UVI notes
