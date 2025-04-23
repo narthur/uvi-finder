@@ -20,6 +20,7 @@
 - Large diffs are automatically chunked into ~4000 token pieces to stay within model context limits
 - Results from multiple chunks are deduplicated by description before returning
 - Package lock files (package-lock.json, yarn.lock, etc.) are automatically excluded from analysis
+- Version number changes are not considered UVIs, even though they often accompany them
 
 ## Implementation Details
 - Diffs are split by file boundaries to maintain context

@@ -21,6 +21,7 @@ Exclude:
 - Development tooling updates
 - Package updates that don't affect user experience
 - Internal documentation changes
+- Version number changes or version bumps (these are not UVIs themselves)
 
 Your response should be valid JSON with this exact structure:
 {
@@ -31,7 +32,9 @@ Your response should be valid JSON with this exact structure:
       "impact": "Optional description of the impact"
     }
   ]
-}`;
+}
+
+Important: Do not include version number changes as improvements. While version bumps often accompany UVIs, they are not UVIs themselves.`;
 
 const MAX_CHUNK_SIZE = 4000; // Conservative limit to leave room for prompts
 
