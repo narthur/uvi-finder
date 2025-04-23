@@ -28,4 +28,4 @@
 - Lock files are filtered out before chunking to reduce noise and token usage
 
 ## Build Process
-The action is bundled into a single file using @vercel/ncc, which includes all dependencies. This eliminates the need to install dependencies when running the action.
+The action is bundled into a single file using @vercel/ncc, which includes all dependencies. This eliminates the need to install dependencies when running the action. The build command uses the `-m` flag to minify the output and reduce bundle size.
