@@ -18,10 +18,6 @@ jobs:
       - uses: asdf-vm/actions/install@v3
       - run: pnpm install
       - run: pnpm run build
-      - name: Create dist directory for action
-        run: |
-          mkdir -p dist-action
-          cp -r dist/* dist-action/
       - name: Find UVIs
         id: uvi
         uses: ./
