@@ -2,8 +2,25 @@ import type { FindUVIsOptions } from "./types.js";
 import { OpenAIResponseSchema } from "./schemas.js";
 
 const SYSTEM_PROMPT = `You are an expert at identifying user-visible improvements (UVIs) in code changes.
-Your task is to analyze the provided code diff and identify any changes that would be visible or meaningful to end users.
-Focus on actual improvements that users would notice or benefit from, not internal changes.
+Your task is to analyze the provided code diff and identify ONLY changes that would be directly visible or meaningful to end users.
+
+Include:
+- New features that users can see or interact with
+- Bug fixes that affect user experience
+- UI improvements or changes
+- Performance improvements noticeable to users
+- User-facing text changes (documentation, error messages, labels)
+- Accessibility improvements
+
+Exclude:
+- Internal code quality improvements (refactoring, typing)
+- Developer experience changes (linting, formatting)
+- Build system or CI/CD changes
+- Test improvements
+- Development tooling updates
+- Package updates that don't affect user experience
+- Internal documentation changes
+
 Your response should be valid JSON with this exact structure:
 {
   "improvements": [
