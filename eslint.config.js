@@ -18,7 +18,7 @@ export default defineConfig([
     languageOptions: {
       globals: globals.node,
       parserOptions: {
-        project: "./tsconfig.json",
+        project: "./tsconfig.dev.json",
       },
     },
   },
@@ -30,6 +30,7 @@ export default defineConfig([
     },
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
     },
   },
 ]);

@@ -3,7 +3,7 @@ import * as github from "@actions/github";
 import OpenAI from "openai";
 import { findUVIs } from "./uvi-finder.js";
 import { updatePRComment } from "./github-utils.js";
-
+import { z } from "zod";
 async function run(): Promise<void> {
   try {
     // Get inputs
@@ -19,9 +19,21 @@ async function run(): Promise<void> {
 
     // Get PR context
     const { pull_request: pr } = github.context.payload;
+
     if (!pr) {
       throw new Error("This action can only be run on pull requests");
     }
+
+    const prData = z
+      .object({
+        base: z.object({
+          sha: z.string(),
+        }),
+        head: z.object({
+          sha: z.string(),
+        }),
+      })
+      .parse(pr);
 
     // Find UVIs
     const uvis = await findUVIs({
@@ -31,8 +43,8 @@ async function run(): Promise<void> {
       owner: github.context.repo.owner,
       repo: github.context.repo.repo,
       pullNumber: pr.number,
-      base: pr.base.sha,
-      head: pr.head.sha,
+      base: prData.base.sha,
+      head: prData.head.sha,
     });
 
     // Update PR comment
@@ -57,4 +69,4 @@ async function run(): Promise<void> {
   }
 }
 
-run();
+void run();

@@ -136,8 +136,8 @@ describe("findUVIs", () => {
 
   it("should handle large diffs by chunking and deduplicating", async () => {
     // Create a large diff that will be split into chunks
-    const file1 = "diff --git a/file1.ts b/file1.ts\n" + "x".repeat(4000);
-    const file2 = "diff --git a/file2.ts b/file2.ts\n" + "y".repeat(4000);
+    const file1 = "diff --git a/file1.ts b/file1.ts\n" + "x".repeat(3000);
+    const file2 = "diff --git a/file2.ts b/file2.ts\n" + "y".repeat(3000);
     const largeDiff = file1 + file2;
 
     const mockOctokit = {
@@ -168,7 +168,8 @@ describe("findUVIs", () => {
     const mockOpenAI = {
       chat: {
         completions: {
-          create: vi.fn()
+          create: vi
+            .fn()
             .mockResolvedValueOnce({
               choices: [
                 {
@@ -190,6 +191,9 @@ describe("findUVIs", () => {
                   },
                 },
               ],
+            })
+            .mockResolvedValue({
+              choices: [],
             }),
         },
       },

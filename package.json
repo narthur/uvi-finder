@@ -8,7 +8,7 @@
     "build": "tsc",
     "test": "vitest",
     "lint": "eslint .",
-    "checkTs": "tsc --noEmit",
+    "checkTs": "tsc --project tsconfig.dev.json --noEmit",
     "prepare": "npm run build"
   },
   "keywords": [

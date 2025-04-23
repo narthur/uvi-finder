@@ -48,7 +48,7 @@ export async function findUVIs(options: FindUVIsOptions) {
   const { octokit, openai, model, owner, repo, pullNumber } = options;
 
   // Get the PR diff
-  const response = await octokit.rest.pulls.get({
+  const { data } = await octokit.rest.pulls.get({
     owner,
     repo,
     pull_number: pullNumber,
@@ -58,7 +58,7 @@ export async function findUVIs(options: FindUVIsOptions) {
   });
 
   // The diff comes back as a string when using mediaType: "diff"
-  const diffText = response.data.toString();
+  const diffText = JSON.stringify(data);
   const chunks = chunkDiff(diffText);
   const allImprovements: Array<{
     description: string;
@@ -85,7 +85,7 @@ export async function findUVIs(options: FindUVIsOptions) {
     if (!content) continue;
 
     try {
-      const result = JSON.parse(content);
+      const result: unknown = JSON.parse(content);
       const parsed = OpenAIResponseSchema.safeParse(result);
 
       if (parsed.success) {
