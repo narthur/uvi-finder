@@ -37,8 +37,10 @@ const MAX_CHUNK_SIZE = 4000; // Conservative limit to leave room for prompts
 function shouldIncludeFile(filePath: string): boolean {
   // Check for directory exclusions first
   const dirExclusions = ["dist/", "dist-action/", "dist-release/"];
-  if (dirExclusions.some((dir) => filePath.includes(dir))) {
-    return false;
+  if (dirExclusions.some((dir) => {
+    const relativePath = path.relative(dir, filePath);
+    return !relativePath.startsWith("..") && !path.isAbsolute(relativePath);
+  })) {
   }
 
   // Then check for file exclusions
