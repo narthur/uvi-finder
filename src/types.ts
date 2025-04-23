@@ -1,3 +1,6 @@
+import type { getOctokit } from "@actions/github";
+import type { OpenAI } from "openai";
+
 export interface UVI {
   description: string;
   category?: string;
@@ -5,8 +8,8 @@ export interface UVI {
 }
 
 export interface FindUVIsOptions {
-  octokit: any; // We'll properly type this from @actions/github
-  openai: any; // We'll properly type this from openai
+  octokit: ReturnType<typeof getOctokit>;
+  openai: OpenAI;
   model: string;
   owner: string;
   repo: string;
@@ -16,7 +19,7 @@ export interface FindUVIsOptions {
 }
 
 export interface UpdatePRCommentOptions {
-  octokit: any;
+  octokit: ReturnType<typeof getOctokit>;
   owner: string;
   repo: string;
   pullNumber: number;
