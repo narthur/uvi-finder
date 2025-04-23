@@ -1,5 +1,6 @@
 import type { FindUVIsOptions } from "./types.js";
 import { OpenAIResponseSchema } from "./schemas.js";
+import path from "node:path";
 
 const SYSTEM_PROMPT = `You are an expert at identifying user-visible improvements (UVIs) in code changes.
 Your task is to analyze the provided code diff and identify ONLY changes that would be directly visible or meaningful to end users.
@@ -37,10 +38,8 @@ const MAX_CHUNK_SIZE = 4000; // Conservative limit to leave room for prompts
 function shouldIncludeFile(filePath: string): boolean {
   // Check for directory exclusions first
   const dirExclusions = ["dist/", "dist-action/", "dist-release/"];
-  if (dirExclusions.some((dir) => {
-    const relativePath = path.relative(dir, filePath);
-    return !relativePath.startsWith("..") && !path.isAbsolute(relativePath);
-  })) {
+  if (dirExclusions.some(dir => filePath.includes(dir))) {
+    return false;
   }
 
   // Then check for file exclusions
@@ -53,7 +52,7 @@ function shouldIncludeFile(filePath: string): boolean {
     "poetry.lock",
     "Cargo.lock",
   ];
-  return !fileExclusions.some((excluded) => filePath.endsWith(excluded));
+  return !fileExclusions.some(excluded => filePath.endsWith(excluded));
 }
 
 function chunkDiff(diff: string): string[] {
