@@ -1,0 +1,32 @@
+name: 'UVI Finder'
+description: 'Automatically identifies User-Visible Improvements in pull requests using OpenAI'
+
+inputs:
+  github-token:
+    description: 'GitHub token for API access'
+    required: true
+  openai-api-key:
+    description: 'OpenAI API key for analysis'
+    required: true
+  model:
+    description: 'OpenAI model to use'
+    required: false
+    default: 'gpt-4'
+  comment-header:
+    description: 'Custom header for PR comment'
+    required: false
+    default: '## User-Visible Improvements'
+
+outputs:
+  uvi-count:
+    description: 'Number of UVIs found in the PR'
+  uvi-list:
+    description: 'JSON array of identified UVIs'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
+
+branding:
+  icon: 'search'
+  color: 'blue'
