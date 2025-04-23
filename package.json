@@ -1,6 +1,6 @@
 {
   "name": "uvi-finder",
-  "version": "1.3.2",
+  "version": "1.5.0",
   "description": "GitHub Action to find user-visible improvements in pull requests",
   "main": "dist/index.js",
   "type": "module",

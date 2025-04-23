@@ -99,9 +99,14 @@ steps:
 
 ## Action Output
 
-The action logs all identified UVIs to the Actions run log, making them visible directly in the GitHub UI:
+The action logs all identified UVIs and analyzed files to the Actions run log, making them visible directly in the GitHub UI:
 
 ```
+Analyzing files:
+- src/components/Button.tsx
+- src/components/Modal.tsx
+- src/styles/theme.ts
+
 User-Visible Improvements Found:
 1. Added dark mode support for better visibility in low-light conditions
 2. Improved error messages for failed API requests
@@ -128,8 +133,11 @@ Last updated: [timestamp]
 
 - PR comments require write permissions for pull requests
 - Large changes are automatically chunked to stay within OpenAI's context limits
-- Package lock files are automatically excluded from analysis
 - Only changes that directly affect end users are considered UVIs
+- The following files and directories are excluded from analysis:
+  - Package lock files (package-lock.json, yarn.lock, pnpm-lock.yaml, bun.lockb)
+  - Other lock files (Gemfile.lock, poetry.lock, Cargo.lock)
+  - Build output directories (dist/, dist-action/, dist-release/)
 
 ## Contributing
 
