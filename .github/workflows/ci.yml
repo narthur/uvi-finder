@@ -55,9 +55,6 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
-      - uses: asdf-vm/actions/install@v3
-      - run: pnpm install
-      - run: pnpm run build
       - uses: ./
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
