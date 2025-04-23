@@ -1,18 +1,20 @@
-import type { UpdatePRCommentOptions } from './types.js';
-import type { UVI } from './schemas.js';
+import type { UpdatePRCommentOptions } from "./types.js";
+import type { UVI } from "./schemas.js";
 
-export async function updatePRComment(options: UpdatePRCommentOptions): Promise<void> {
+export async function updatePRComment(
+  options: UpdatePRCommentOptions
+): Promise<void> {
   const { octokit, owner, repo, pullNumber, uvis, header } = options;
 
   // Find existing comment
   const comments = await octokit.rest.issues.listComments({
     owner,
     repo,
-    issue_number: pullNumber
+    issue_number: pullNumber,
   });
 
-  const existingComment = comments.data.find(
-    (comment: { body?: string }) => comment.body?.startsWith(header)
+  const existingComment = comments.data.find((comment: { body?: string }) =>
+    comment.body?.startsWith(header)
   );
 
   // Format the comment body
@@ -24,7 +26,7 @@ export async function updatePRComment(options: UpdatePRCommentOptions): Promise<
       owner,
       repo,
       comment_id: existingComment.id,
-      body
+      body,
     });
   } else {
     // Create new comment
@@ -32,14 +34,14 @@ export async function updatePRComment(options: UpdatePRCommentOptions): Promise<
       owner,
       repo,
       issue_number: pullNumber,
-      body
+      body,
     });
   }
 }
 
 function formatComment(header: string, uvis: UVI[]): string {
   const timestamp = new Date().toISOString();
-  
+
   if (uvis.length === 0) {
     return `${header}
 
@@ -50,17 +52,19 @@ Last updated: ${timestamp}`;
 
   const improvements = uvis
     .map((uvi, index) => {
-      let text = `${index + 1}. ${uvi.description}`;
+      let text = `${String(index + 1)}. ${uvi.description}`;
       if (uvi.impact) {
         text += ` (${uvi.impact})`;
       }
       return text;
     })
-    .join('\n');
+    .join("\n");
 
   return `${header}
 
-This PR contains ${uvis.length} user-visible improvement${uvis.length === 1 ? '' : 's'}:
+This PR contains ${uvis.length.toString()} user-visible improvement${
+    uvis.length === 1 ? "" : "s"
+  }:
 
 ${improvements}
 

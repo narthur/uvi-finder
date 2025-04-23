@@ -17,6 +17,21 @@ Your response should be valid JSON with this exact structure:
 
 const MAX_CHUNK_SIZE = 4000; // Conservative limit to leave room for prompts
 
+// Files to exclude from analysis
+const EXCLUDED_FILES = [
+  "package-lock.json",
+  "yarn.lock",
+  "pnpm-lock.yaml",
+  "bun.lockb",
+  "Gemfile.lock",
+  "poetry.lock",
+  "Cargo.lock",
+];
+
+function shouldIncludeFile(filePath: string): boolean {
+  return !EXCLUDED_FILES.some((excluded) => filePath.endsWith(excluded));
+}
+
 function chunkDiff(diff: string): string[] {
   // Split by file (each file starts with 'diff --git')
   const files = diff.split(/(?=diff --git )/);
@@ -24,6 +39,12 @@ function chunkDiff(diff: string): string[] {
   let currentChunk = "";
 
   for (const file of files) {
+    // Skip excluded files
+    const match = file.match(/^diff --git a\/(.*?) b\//);
+    if (match && !shouldIncludeFile(match[1])) {
+      continue;
+    }
+
     // If adding this file would exceed chunk size, start a new chunk
     if (
       currentChunk.length + file.length > MAX_CHUNK_SIZE &&

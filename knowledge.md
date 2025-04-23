@@ -19,8 +19,10 @@
 - PR comments are maintained by finding existing comments that start with the header text
 - Large diffs are automatically chunked into ~4000 token pieces to stay within model context limits
 - Results from multiple chunks are deduplicated by description before returning
+- Package lock files (package-lock.json, yarn.lock, etc.) are automatically excluded from analysis
 
 ## Implementation Details
 - Diffs are split by file boundaries to maintain context
 - Each chunk is analyzed separately and results are merged
 - Duplicate improvements (same description) are removed to prevent redundancy
+- Lock files are filtered out before chunking to reduce noise and token usage

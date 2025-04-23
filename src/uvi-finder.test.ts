@@ -191,9 +191,6 @@ describe("findUVIs", () => {
                   },
                 },
               ],
-            })
-            .mockResolvedValue({
-              choices: [],
             }),
         },
       },
@@ -213,5 +210,63 @@ describe("findUVIs", () => {
     // Should only include unique improvements based on description
     expect(result).toEqual([improvement1, improvement2]);
     expect(mockOpenAI.chat.completions.create).toHaveBeenCalledTimes(2);
+  });
+
+  it("should exclude lock files from analysis", async () => {
+    const diff = `diff --git a/package-lock.json b/package-lock.json
+... lock file changes ...
+diff --git a/src/index.ts b/src/index.ts
+... actual code changes ...
+diff --git a/yarn.lock b/yarn.lock
+... more lock file changes ...`;
+
+    const mockOctokit = {
+      rest: {
+        pulls: {
+          get: vi.fn().mockResolvedValue({ data: diff }),
+        },
+      },
+    };
+
+    const improvement = {
+      description: "Added new feature",
+      category: "Feature",
+    };
+
+    const mockOpenAI = {
+      chat: {
+        completions: {
+          create: vi.fn().mockResolvedValue({
+            choices: [
+              {
+                message: {
+                  content: JSON.stringify({
+                    improvements: [improvement],
+                  }),
+                },
+              },
+            ],
+          }),
+        },
+      },
+    };
+
+    await findUVIs({
+      octokit: mockOctokit as any,
+      openai: mockOpenAI as any,
+      model: "gpt-4",
+      owner: "test",
+      repo: "test",
+      pullNumber: 1,
+      base: "base-sha",
+      head: "head-sha",
+    });
+
+    // Should only be called once with the non-lock file changes
+    const calls = mockOpenAI.chat.completions.create.mock.calls;
+    expect(calls.length).toBe(1);
+    expect(calls[0][0].messages[1].content).not.toContain("package-lock.json");
+    expect(calls[0][0].messages[1].content).not.toContain("yarn.lock");
+    expect(calls[0][0].messages[1].content).toContain("src/index.ts");
   });
 });
