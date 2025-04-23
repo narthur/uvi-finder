@@ -1,0 +1,68 @@
+name: Publish
+on:
+  push:
+    branches:
+      - main
+permissions:
+  contents: write
+  packages: write
+  pull-requests: write  # Required for UVI finder
+jobs:
+  find-uvis:
+    runs-on: ubuntu-latest
+    outputs:
+      uvi-list: ${{ steps.uvi.outputs.uvi-list }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for analyzing changes
+      - uses: asdf-vm/actions/install@v3
+      - run: pnpm install
+      - run: pnpm run build
+      - name: Find UVIs
+        id: uvi
+        uses: ./
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+
+  release:
+    needs: find-uvis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for generating release notes
+      - uses: asdf-vm/actions/install@v3
+      - run: pnpm install
+      - run: pnpm run build
+      - env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UVI_LIST: ${{ needs.find-uvis.outputs.uvi-list }}
+        run: |
+          VER=$(node -p "require('./package.json').version")
+          VER_SHORT=$(echo $VER | cut -d. -f1)
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          
+          # Format UVIs for release notes
+          NOTES="## User-Visible Improvements\n\n"
+          if [ "$UVI_LIST" != "[]" ] && [ -n "$UVI_LIST" ]; then
+            echo "$UVI_LIST" | jq -r '.[] | "* " + .description + if .impact then " (" + .impact + ")" else "" end' | while read -r line; do
+              NOTES="$NOTES$line\n"
+            done
+          else
+            NOTES="$NOTES*No user-visible improvements in this release.*\n"
+          fi
+          
+          # Create main version release with UVI notes
+          gh release create v$VER \
+            --latest \
+            --title "$PACKAGE_NAME v$VER" \
+            --notes "$NOTES"
+          
+          # Create major version release
+          gh release delete v$VER_SHORT --yes --cleanup-tag || true
+          gh release create v$VER_SHORT \
+            --latest=false \
+            --title "$PACKAGE_NAME v$VER_SHORT (Latest $VER_SHORT.x)" \
+            --notes "This is an alias release that always points to the latest $VER_SHORT.x version. Current version: v$VER"
