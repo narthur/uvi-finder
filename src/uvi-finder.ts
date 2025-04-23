@@ -1,11 +1,21 @@
-import type { FindUVIsOptions, UVI } from "./types.js";
+import type { FindUVIsOptions } from "./types.js";
+import { OpenAIResponseSchema } from "./schemas.js";
 
 const SYSTEM_PROMPT = `You are an expert at identifying user-visible improvements (UVIs) in code changes.
 Your task is to analyze the provided code diff and identify any changes that would be visible or meaningful to end users.
 Focus on actual improvements that users would notice or benefit from, not internal changes.
-Respond with a JSON array of improvements, each with a description and optional category and impact fields.`;
+Your response should be valid JSON with this exact structure:
+{
+  "improvements": [
+    {
+      "description": "Description of the improvement",
+      "category": "Optional category of the improvement",
+      "impact": "Optional description of the impact"
+    }
+  ]
+}`;
 
-export async function findUVIs(options: FindUVIsOptions): Promise<UVI[]> {
+export async function findUVIs(options: FindUVIsOptions) {
   const { octokit, openai, model, owner, repo, pullNumber } = options;
 
   // Get the PR diff
@@ -30,11 +40,10 @@ export async function findUVIs(options: FindUVIsOptions): Promise<UVI[]> {
         content: `Please analyze this diff for user-visible improvements:\n\n${diff}`,
       },
     ],
-    response_format: { type: "json_object" },
     temperature: 0.2,
   });
 
-  // Parse the response
+  // Parse and validate the response
   const content = completion.choices[0]?.message?.content;
   if (!content) {
     return [];
@@ -42,7 +51,14 @@ export async function findUVIs(options: FindUVIsOptions): Promise<UVI[]> {
 
   try {
     const result = JSON.parse(content);
-    return result.improvements || [];
+    const parsed = OpenAIResponseSchema.safeParse(result);
+    
+    if (!parsed.success) {
+      console.error("Invalid OpenAI response format:", parsed.error);
+      return [];
+    }
+
+    return parsed.data.improvements;
   } catch (error) {
     console.error("Failed to parse OpenAI response:", error);
     return [];

@@ -1,11 +1,6 @@
 import type { getOctokit } from "@actions/github";
 import type { OpenAI } from "openai";
-
-export interface UVI {
-  description: string;
-  category?: string;
-  impact?: string;
-}
+import type { UVI } from "./schemas.js";
 
 export interface FindUVIsOptions {
   octokit: ReturnType<typeof getOctokit>;

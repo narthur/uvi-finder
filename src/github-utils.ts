@@ -1,4 +1,5 @@
-import type { UpdatePRCommentOptions, UVI } from './types.js';
+import type { UpdatePRCommentOptions } from './types.js';
+import type { UVI } from './schemas.js';
 
 export async function updatePRComment(options: UpdatePRCommentOptions): Promise<void> {
   const { octokit, owner, repo, pullNumber, uvis, header } = options;
