@@ -1,6 +1,6 @@
 # UVI Finder Action
 
-A GitHub Action that automatically identifies User-Visible Improvements (UVIs) in pull requests using OpenAI's API. It analyzes the changes between the base and head branches to detect improvements that would be visible or meaningful to end users.
+A GitHub Action that automatically identifies [User-Visible Improvements](https://messymatters.com/uvi) (UVIs) in pull requests using OpenAI's API. It analyzes the changes between the base and head branches to detect improvements that would be visible or meaningful to end users.
 
 ## Features
 
