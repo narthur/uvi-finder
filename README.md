@@ -38,10 +38,10 @@ jobs:
   find-uvis:
     runs-on: ubuntu-latest
     permissions:
-      content: read
+      contents: read
       pull-requests: write  # Required for commenting on PRs
     steps:
-      - uses: actions/uvi-finder@v1
+      - uses: narthur/uvi-finder@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
@@ -59,7 +59,7 @@ jobs:
   find-uvis:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/uvi-finder@v1
+      - uses: narthur/uvi-finder@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
