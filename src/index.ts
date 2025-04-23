@@ -80,6 +80,16 @@ async function run(): Promise<void> {
       });
     }
 
+    // Log UVIs to action output in all contexts
+    if (uvis.length > 0) {
+      core.info("\nUser-Visible Improvements Found:");
+      uvis.forEach((uvi, index) => {
+        core.info(`${String(index + 1)}. ${uvi.description}${uvi.impact ? ` (${uvi.impact})` : ""}`);
+      });
+    } else {
+      core.info("\nNo user-visible improvements were found.");
+    }
+
     // Set outputs regardless of PR context
     core.setOutput("uvi-count", uvis.length);
     core.setOutput("uvi-list", JSON.stringify(uvis));

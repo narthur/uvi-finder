@@ -9,6 +9,7 @@ A GitHub Action that automatically identifies [User-Visible Improvements](https:
 - 💬 Maintains an up-to-date comment in PRs listing all identified UVIs
 - 📊 Exposes UVI count and details as outputs for use in other workflow steps
 - 🔄 Updates automatically when changes are pushed
+- 📝 Logs all improvements to the Actions run log
 
 ## What is a UVI?
 
@@ -96,9 +97,20 @@ steps:
       echo "Improvements: ${{ steps.uvi.outputs.uvi-list }}"
 ```
 
+## Action Output
+
+The action logs all identified UVIs to the Actions run log, making them visible directly in the GitHub UI:
+
+```
+User-Visible Improvements Found:
+1. Added dark mode support for better visibility in low-light conditions
+2. Improved error messages for failed API requests
+3. Reduced page load time by 30%
+```
+
 ## PR Comment Format
 
-When run on a pull request, the action maintains a comment that looks like this:
+When run on a pull request, the action also maintains a comment that looks like this:
 
 ```markdown
 ## User-Visible Improvements
