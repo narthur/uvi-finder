@@ -10,6 +10,19 @@ A GitHub Action that automatically identifies [User-Visible Improvements](https:
 - 📊 Exposes UVI count and details as outputs for use in other workflow steps
 - 🔄 Updates automatically when PR changes
 
+## What is a UVI?
+
+A User-Visible Improvement (UVI) is any change that directly impacts the end user experience. This includes:
+
+- New features users can see or interact with
+- Bug fixes that affect user experience
+- UI improvements or changes
+- Performance improvements noticeable to users
+- User-facing text changes (documentation, error messages, labels)
+- Accessibility improvements
+
+Internal changes like code refactoring, CI improvements, or developer tooling updates are not considered UVIs since they don't directly affect the end user experience.
+
 ## Usage
 
 Add this action to your workflow:
@@ -23,6 +36,9 @@ on:
 jobs:
   find-uvis:
     runs-on: ubuntu-latest
+    permissions:
+      content: read
+      pull-requests: write  # Required for commenting on PRs
     steps:
       - uses: actions/uvi-finder@v1
         with:
@@ -77,6 +93,13 @@ This PR contains 3 user-visible improvements:
 
 Last updated: [timestamp]
 ```
+
+## Limitations
+
+- The action requires write permissions for pull requests to maintain comments
+- Large PRs are automatically chunked to stay within OpenAI's context limits
+- Package lock files are automatically excluded from analysis
+- Only changes that directly affect end users are considered UVIs
 
 ## Contributing
 
