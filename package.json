@@ -1,21 +1,33 @@
 {
   "name": "uvi-finder",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "GitHub Action to find user-visible improvements in pull requests",
+  "main": "dist/index.js",
   "type": "module",
   "scripts": {
+    "build": "tsc",
     "test": "vitest",
     "lint": "eslint .",
-    "build": "tsc",
-    "checkTs": "tsc --noEmit"
+    "checkTs": "tsc --noEmit",
+    "prepare": "npm run build"
   },
-  "keywords": [],
+  "keywords": [
+    "github",
+    "actions",
+    "uvi",
+    "improvements"
+  ],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.6.1",
+  "dependencies": {
+    "@actions/core": "^1.10.1",
+    "@actions/github": "^6.0.0",
+    "openai": "^4.24.1"
+  },
   "devDependencies": {
     "@eslint/js": "^9.25.1",
+    "@types/node": "^20.10.5",
     "eslint": "^9.25.1",
     "globals": "^16.0.0",
     "typescript": "^5.8.3",
