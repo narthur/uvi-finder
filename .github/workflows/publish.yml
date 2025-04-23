@@ -18,6 +18,10 @@ jobs:
       - uses: asdf-vm/actions/install@v3
       - run: pnpm install
       - run: pnpm run build
+      - name: Create dist directory for action
+        run: |
+          mkdir -p dist-action
+          cp -r dist/* dist-action/
       - name: Find UVIs
         id: uvi
         uses: ./
@@ -35,6 +39,10 @@ jobs:
       - uses: asdf-vm/actions/install@v3
       - run: pnpm install
       - run: pnpm run build
+      - name: Create dist directory for release
+        run: |
+          mkdir -p dist-release
+          cp -r dist/* dist-release/
       - env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           UVI_LIST: ${{ needs.find-uvis.outputs.uvi-list }}
