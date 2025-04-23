@@ -34,19 +34,24 @@ Your response should be valid JSON with this exact structure:
 
 const MAX_CHUNK_SIZE = 4000; // Conservative limit to leave room for prompts
 
-// Files to exclude from analysis
-const EXCLUDED_FILES = [
-  "package-lock.json",
-  "yarn.lock",
-  "pnpm-lock.yaml",
-  "bun.lockb",
-  "Gemfile.lock",
-  "poetry.lock",
-  "Cargo.lock",
-];
-
 function shouldIncludeFile(filePath: string): boolean {
-  return !EXCLUDED_FILES.some((excluded) => filePath.endsWith(excluded));
+  // Check for directory exclusions first
+  const dirExclusions = ["dist/", "dist-action/", "dist-release/"];
+  if (dirExclusions.some((dir) => filePath.includes(dir))) {
+    return false;
+  }
+
+  // Then check for file exclusions
+  const fileExclusions = [
+    "package-lock.json",
+    "yarn.lock",
+    "pnpm-lock.yaml",
+    "bun.lockb",
+    "Gemfile.lock",
+    "poetry.lock",
+    "Cargo.lock",
+  ];
+  return !fileExclusions.some((excluded) => filePath.endsWith(excluded));
 }
 
 function chunkDiff(diff: string): string[] {
@@ -87,7 +92,7 @@ export async function findUVIs(options: FindUVIsOptions) {
 
   // Get the diff either from PR or commit comparison
   let diffText;
-  if ('pullNumber' in options) {
+  if ("pullNumber" in options) {
     const { data } = await octokit.rest.pulls.get({
       owner,
       repo,

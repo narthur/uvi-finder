@@ -128,8 +128,11 @@ Last updated: [timestamp]
 
 - PR comments require write permissions for pull requests
 - Large changes are automatically chunked to stay within OpenAI's context limits
-- Package lock files are automatically excluded from analysis
 - Only changes that directly affect end users are considered UVIs
+- The following files and directories are excluded from analysis:
+  - Package lock files (package-lock.json, yarn.lock, pnpm-lock.yaml, bun.lockb)
+  - Other lock files (Gemfile.lock, poetry.lock, Cargo.lock)
+  - Build output directories (dist/, dist-action/, dist-release/)
 
 ## Contributing
 
