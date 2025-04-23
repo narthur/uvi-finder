@@ -1,28 +1,20 @@
-import js from "@eslint/js";
 import globals from "globals";
 import tseslint from "typescript-eslint";
-import { defineConfig } from "eslint/config";
 import vitestPlugin from "eslint-plugin-vitest";
 
-export default defineConfig([
+export default tseslint.config(
   {
-    ignores: ["dist/**/*"],
+    ignores: ["**/*.js"],
   },
+  tseslint.configs.strictTypeChecked,
   {
-    files: ["**/*.{js,mjs,cjs,ts}"],
-    plugins: { js },
-    extends: ["js/recommended"],
-  },
-  {
-    files: ["**/*.{js,mjs,cjs,ts}"],
     languageOptions: {
       globals: globals.node,
       parserOptions: {
-        project: "./tsconfig.dev.json",
+        project: ["./tsconfig.dev.json"],
       },
     },
   },
-  tseslint.configs.strictTypeChecked,
   {
     files: ["**/*.test.ts"],
     plugins: {
@@ -33,5 +25,5 @@ export default defineConfig([
       "@typescript-eslint/no-unsafe-assignment": "off",
       "@typescript-eslint/no-unsafe-member-access": "off",
     },
-  },
-]);
+  }
+);
