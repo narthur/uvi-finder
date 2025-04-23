@@ -15,9 +15,14 @@ export default defineConfig([
   },
   {
     files: ["**/*.{js,mjs,cjs,ts}"],
-    languageOptions: { globals: globals.node },
+    languageOptions: {
+      globals: globals.node,
+      parserOptions: {
+        project: "./tsconfig.json",
+      },
+    },
   },
-  tseslint.configs.recommended,
+  tseslint.configs.strictTypeChecked,
   {
     files: ["**/*.test.ts"],
     plugins: {

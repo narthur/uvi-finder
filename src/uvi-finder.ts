@@ -25,7 +25,10 @@ function chunkDiff(diff: string): string[] {
 
   for (const file of files) {
     // If adding this file would exceed chunk size, start a new chunk
-    if (currentChunk.length + file.length > MAX_CHUNK_SIZE && currentChunk.length > 0) {
+    if (
+      currentChunk.length + file.length > MAX_CHUNK_SIZE &&
+      currentChunk.length > 0
+    ) {
       chunks.push(currentChunk);
       currentChunk = file;
     } else {
@@ -57,7 +60,11 @@ export async function findUVIs(options: FindUVIsOptions) {
   // The diff comes back as a string when using mediaType: "diff"
   const diffText = response.data.toString();
   const chunks = chunkDiff(diffText);
-  const allImprovements: Array<{ description: string; category?: string; impact?: string }> = [];
+  const allImprovements: Array<{
+    description: string;
+    category?: string;
+    impact?: string;
+  }> = [];
 
   // Analyze each chunk
   for (const chunk of chunks) {
@@ -80,7 +87,7 @@ export async function findUVIs(options: FindUVIsOptions) {
     try {
       const result = JSON.parse(content);
       const parsed = OpenAIResponseSchema.safeParse(result);
-      
+
       if (parsed.success) {
         allImprovements.push(...parsed.data.improvements);
       } else {
@@ -92,8 +99,11 @@ export async function findUVIs(options: FindUVIsOptions) {
   }
 
   // Create a map to track seen descriptions and their corresponding improvements
-  const seenDescriptions = new Map<string, { description: string; category?: string; impact?: string }>();
-  
+  const seenDescriptions = new Map<
+    string,
+    { description: string; category?: string; impact?: string }
+  >();
+
   // Process improvements in reverse order to keep the first occurrence
   for (let i = allImprovements.length - 1; i >= 0; i--) {
     const improvement = allImprovements[i];
@@ -101,7 +111,7 @@ export async function findUVIs(options: FindUVIsOptions) {
   }
 
   // Convert back to array and sort by description to ensure consistent ordering
-  return Array.from(seenDescriptions.values()).sort((a, b) => 
+  return Array.from(seenDescriptions.values()).sort((a, b) =>
     a.description.localeCompare(b.description)
   );
 }
