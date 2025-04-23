@@ -1,14 +1,14 @@
 # UVI Finder Action
 
-A GitHub Action that automatically identifies [User-Visible Improvements](https://messymatters.com/uvi) (UVIs) in pull requests using OpenAI's API. It analyzes the changes between the base and head branches to detect improvements that would be visible or meaningful to end users.
+A GitHub Action that automatically identifies [User-Visible Improvements](https://messymatters.com/uvi) (UVIs) in pull requests and pushes using OpenAI's API. It analyzes the changes to detect improvements that would be visible or meaningful to end users.
 
 ## Features
 
-- 🔍 Automatically detects user-visible improvements in PR changes
+- 🔍 Automatically detects user-visible improvements in PR changes and pushes
 - 🤖 Uses OpenAI's API for intelligent analysis
-- 💬 Maintains an up-to-date comment in the PR listing all identified UVIs
+- 💬 Maintains an up-to-date comment in PRs listing all identified UVIs
 - 📊 Exposes UVI count and details as outputs for use in other workflow steps
-- 🔄 Updates automatically when PR changes
+- 🔄 Updates automatically when changes are pushed
 
 ## What is a UVI?
 
@@ -25,7 +25,7 @@ Internal changes like code refactoring, CI improvements, or developer tooling up
 
 ## Usage
 
-Add this action to your workflow:
+### Pull Request Analysis
 
 ```yaml
 name: Find UVIs
@@ -39,6 +39,24 @@ jobs:
     permissions:
       content: read
       pull-requests: write  # Required for commenting on PRs
+    steps:
+      - uses: actions/uvi-finder@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+```
+
+### Push Analysis
+
+```yaml
+name: Find UVIs
+on:
+  push:
+    branches: [main]
+
+jobs:
+  find-uvis:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/uvi-finder@v1
         with:
@@ -80,7 +98,7 @@ steps:
 
 ## PR Comment Format
 
-The action maintains a comment in your PR that looks like this:
+When run on a pull request, the action maintains a comment that looks like this:
 
 ```markdown
 ## User-Visible Improvements
@@ -96,8 +114,8 @@ Last updated: [timestamp]
 
 ## Limitations
 
-- The action requires write permissions for pull requests to maintain comments
-- Large PRs are automatically chunked to stay within OpenAI's context limits
+- PR comments require write permissions for pull requests
+- Large changes are automatically chunked to stay within OpenAI's context limits
 - Package lock files are automatically excluded from analysis
 - Only changes that directly affect end users are considered UVIs
 
