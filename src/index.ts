@@ -4,6 +4,13 @@ import OpenAI from "openai";
 import { findUVIs } from "./uvi-finder.js";
 import { updatePRComment } from "./github-utils.js";
 import { z } from "zod";
+
+// Define the push event payload schema
+const PushEventSchema = z.object({
+  before: z.string(),
+  after: z.string(),
+});
+
 async function run(): Promise<void> {
   try {
     // Get inputs
@@ -17,55 +24,68 @@ async function run(): Promise<void> {
     const octokit = github.getOctokit(githubToken);
     const openai = new OpenAI({ apiKey: openaiApiKey });
 
-    // Get PR context
+    // Get PR context if available
     const { pull_request: pr } = github.context.payload;
 
+    // If no PR, analyze the push diff instead
+    let uvis;
     if (!pr) {
-      throw new Error("This action can only be run on pull requests");
+      core.info("No PR context found, analyzing push diff instead");
+      const { owner, repo } = github.context.repo;
+      
+      // Parse and validate push event payload
+      const pushPayload = PushEventSchema.parse(github.context.payload);
+
+      uvis = await findUVIs({
+        octokit,
+        openai,
+        model,
+        owner,
+        repo,
+        base: pushPayload.before,
+        head: pushPayload.after,
+      });
+    } else {
+      // PR context available, use PR number
+      const prData = z
+        .object({
+          base: z.object({
+            sha: z.string(),
+          }),
+          head: z.object({
+            sha: z.string(),
+          }),
+        })
+        .parse(pr);
+
+      uvis = await findUVIs({
+        octokit,
+        openai,
+        model,
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        pullNumber: pr.number,
+        base: prData.base.sha,
+        head: prData.head.sha,
+      });
+
+      // Only update PR comment if we're in a PR context
+      await updatePRComment({
+        octokit,
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        pullNumber: pr.number,
+        uvis,
+        header: commentHeader,
+      });
     }
 
-    const prData = z
-      .object({
-        base: z.object({
-          sha: z.string(),
-        }),
-        head: z.object({
-          sha: z.string(),
-        }),
-      })
-      .parse(pr);
-
-    // Find UVIs
-    const uvis = await findUVIs({
-      octokit,
-      openai,
-      model,
-      owner: github.context.repo.owner,
-      repo: github.context.repo.repo,
-      pullNumber: pr.number,
-      base: prData.base.sha,
-      head: prData.head.sha,
-    });
-
-    // Update PR comment
-    await updatePRComment({
-      octokit,
-      owner: github.context.repo.owner,
-      repo: github.context.repo.repo,
-      pullNumber: pr.number,
-      uvis,
-      header: commentHeader,
-    });
-
-    // Set outputs
+    // Set outputs regardless of PR context
     core.setOutput("uvi-count", uvis.length);
     core.setOutput("uvi-list", JSON.stringify(uvis));
   } catch (error) {
-    if (error instanceof Error) {
-      core.setFailed(error.message);
-    } else {
-      core.setFailed("An unexpected error occurred");
-    }
+    // Type-safe error handling
+    core.setFailed(error instanceof Error ? error.message : String(error));
   }
 }
 

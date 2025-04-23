@@ -83,20 +83,33 @@ function chunkDiff(diff: string): string[] {
 }
 
 export async function findUVIs(options: FindUVIsOptions) {
-  const { octokit, openai, model, owner, repo, pullNumber } = options;
+  const { octokit, openai, model, owner, repo } = options;
 
-  // Get the PR diff
-  const { data } = await octokit.rest.pulls.get({
-    owner,
-    repo,
-    pull_number: pullNumber,
-    mediaType: {
-      format: "diff",
-    },
-  });
+  // Get the diff either from PR or commit comparison
+  let diffText;
+  if ('pullNumber' in options) {
+    const { data } = await octokit.rest.pulls.get({
+      owner,
+      repo,
+      pull_number: options.pullNumber,
+      mediaType: {
+        format: "diff",
+      },
+    });
+    diffText = JSON.stringify(data);
+  } else {
+    const { data } = await octokit.rest.repos.compareCommits({
+      owner,
+      repo,
+      base: options.base,
+      head: options.head,
+      mediaType: {
+        format: "diff",
+      },
+    });
+    diffText = JSON.stringify(data);
+  }
 
-  // The diff comes back as a string when using mediaType: "diff"
-  const diffText = JSON.stringify(data);
   const chunks = chunkDiff(diffText);
   const allImprovements: Array<{
     description: string;
