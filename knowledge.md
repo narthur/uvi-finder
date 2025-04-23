@@ -21,12 +21,14 @@
 - Results from multiple chunks are deduplicated by description before returning
 - Package lock files (package-lock.json, yarn.lock, etc.) are automatically excluded from analysis
 - Version number changes are not considered UVIs, even though they often accompany them
+- Project README is analyzed first to understand product context and user needs
 
 ## Implementation Details
 - Diffs are split by file boundaries to maintain context
 - Each chunk is analyzed separately and results are merged
 - Duplicate improvements (same description) are removed to prevent redundancy
 - Lock files are filtered out before chunking to reduce noise and token usage
+- Product context from README helps tailor UVI detection to the specific project
 
 ## Build Process
 The action is bundled into a single file using @vercel/ncc, which includes all dependencies. This eliminates the need to install dependencies when running the action. The build command uses the `-m` flag to minify the output and reduce bundle size.
