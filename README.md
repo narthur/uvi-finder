@@ -99,9 +99,14 @@ steps:
 
 ## Action Output
 
-The action logs all identified UVIs to the Actions run log, making them visible directly in the GitHub UI:
+The action logs all identified UVIs and analyzed files to the Actions run log, making them visible directly in the GitHub UI:
 
 ```
+Analyzing files:
+- src/components/Button.tsx
+- src/components/Modal.tsx
+- src/styles/theme.ts
+
 User-Visible Improvements Found:
 1. Added dark mode support for better visibility in low-light conditions
 2. Improved error messages for failed API requests

@@ -1,6 +1,6 @@
 import type { FindUVIsOptions } from "./types.js";
 import { OpenAIResponseSchema } from "./schemas.js";
-import path from "node:path";
+import * as core from "@actions/core";
 
 const SYSTEM_PROMPT = `You are an expert at identifying user-visible improvements (UVIs) in code changes.
 Your task is to analyze the provided code diff and identify ONLY changes that would be directly visible or meaningful to end users.
@@ -38,7 +38,7 @@ const MAX_CHUNK_SIZE = 4000; // Conservative limit to leave room for prompts
 function shouldIncludeFile(filePath: string): boolean {
   // Check for directory exclusions first
   const dirExclusions = ["dist/", "dist-action/", "dist-release/"];
-  if (dirExclusions.some(dir => filePath.includes(dir))) {
+  if (dirExclusions.some((dir) => filePath.includes(dir))) {
     return false;
   }
 
@@ -52,20 +52,28 @@ function shouldIncludeFile(filePath: string): boolean {
     "poetry.lock",
     "Cargo.lock",
   ];
-  return !fileExclusions.some(excluded => filePath.endsWith(excluded));
+  return !fileExclusions.some((excluded) => filePath.endsWith(excluded));
 }
 
-function chunkDiff(diff: string): string[] {
+function chunkDiff(diff: string): {
+  chunks: string[];
+  analyzedFiles: string[];
+} {
   // Split by file (each file starts with 'diff --git')
   const files = diff.split(/(?=diff --git )/);
   const chunks: string[] = [];
+  const analyzedFiles: string[] = [];
   let currentChunk = "";
 
   for (const file of files) {
     // Skip excluded files
     const match = file.match(/^diff --git a\/(.*?) b\//);
-    if (match && !shouldIncludeFile(match[1])) {
-      continue;
+    if (match) {
+      const filePath = match[1];
+      if (!shouldIncludeFile(filePath)) {
+        continue;
+      }
+      analyzedFiles.push(filePath);
     }
 
     // If adding this file would exceed chunk size, start a new chunk
@@ -85,7 +93,7 @@ function chunkDiff(diff: string): string[] {
     chunks.push(currentChunk);
   }
 
-  return chunks;
+  return { chunks, analyzedFiles };
 }
 
 export async function findUVIs(options: FindUVIsOptions) {
@@ -116,12 +124,19 @@ export async function findUVIs(options: FindUVIsOptions) {
     diffText = JSON.stringify(data);
   }
 
-  const chunks = chunkDiff(diffText);
+  const { chunks, analyzedFiles } = chunkDiff(diffText);
   const allImprovements: Array<{
     description: string;
     category?: string;
     impact?: string;
   }> = [];
+
+  // Log analyzed files
+  core.info("\nAnalyzing files:");
+  analyzedFiles.forEach((file) => {
+    core.info(`- ${file}`);
+  });
+  core.info("");
 
   // Analyze each chunk
   for (const chunk of chunks) {
