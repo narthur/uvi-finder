@@ -1,6 +1,10 @@
 name: 'UVI Finder'
 description: 'Automatically identifies User-Visible Improvements in pull requests using OpenAI'
 
+branding:
+  icon: 'search'
+  color: 'blue'
+
 inputs:
   github-token:
     description: 'GitHub token for API access'
